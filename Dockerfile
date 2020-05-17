@@ -1,11 +1,14 @@
+#https://hub.docker.com/_/php
 FROM php:7.2-fpm
+MAINTAINER vitaliy ilinov <ilinov123@gmail.com>
+
+#See makefile
+ARG SOME_TEST=7.2
+ENV SOME_TEST=${SOME_TEST}
 
 # Install and enable xDebug
 RUN pecl install xdebug \
 && docker-php-ext-enable xdebug
-
-# Set working directory
-WORKDIR /var/www
 
 # Install dependencies
 RUN apt-get update && apt-get install -y \
@@ -17,17 +20,16 @@ RUN apt-get update && apt-get install -y \
     git \
     curl
 
-# Clear cache
-RUN apt-get clean && rm -rf /var/lib/apt/lists/*
-
 # Install composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
 # Add user
-RUN groupadd -g 1001 www \
-&& useradd -u 1001 -ms /bin/bash -g www www
+RUN groupadd -g 1000 www \
+&& useradd -u 1000 -ms /bin/bash -g www www
+
 # Change current user to www
 USER www
-# Expose port 9000 and start php-fpm server
-EXPOSE 9000
+COPY /docker/after-build.sh /docker/after-build.sh
+RUN bash /docker/after-build.sh
+
 CMD ["php-fpm"]

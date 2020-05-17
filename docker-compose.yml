@@ -1,11 +1,9 @@
 version: '3'
 services:
-  #Nginx Service
+  #Nginx Service https://hub.docker.com/_/nginx
   nginx:
     image: nginx:latest
     container_name: nginx
-    restart: unless-stopped
-    tty: true
     ports:
       - "80:80"
       - "443:443"
@@ -13,32 +11,29 @@ services:
       - ./app/:/var/www
       - ./docker/nginx/conf.d/:/etc/nginx/conf.d/
       - ./storage/nginx/:/var/log/nginx
-    depends_on:
-      - php
-    networks:
-      - app-tier
 
-  redis:
-    image: redis:latest
-    hostname: redis
-    container_name: redis
-    ports:
-      - '6379:6379'
-    networks:
-      - app-tier
-
-  #MySQL Service
+  #MySQL Service https://hub.docker.com/_/mysql
   db:
     image: mysql:8.0.12
-    #command: mysqld --default-authentication-plugin=mysql_native_password
+    command: mysqld --default-authentication-plugin=mysql_native_password
     container_name: db
-    restart: unless-stopped
-    tty: true
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: root
     ports:
       - "3307:3306"
     volumes:
       - ./storage/mysql/:/var/lib/mysql/
-      - ./docker/mysql/my.cnf:/etc/mysql/my.cnf
+      - ./docker/mysql/conf.d:/etc/mysql/conf.d
+
+  adminer:
+    image: adminer
+    container_name: adminer
+    restart: always
+    ports:
+      - 8080:8080
+
 
   #PHP Service
   php:
@@ -47,21 +42,11 @@ services:
       dockerfile: Dockerfile
     image: php
     container_name: php
-    restart: unless-stopped
-    tty: true
     env_file:
       - ./.env
     working_dir: /var/www
-    depends_on:
-      - redis
     volumes:
       - ./app:/var/www
       - ./storage/php/:/var/log/php
-      - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
-      - ./docker/php/xdebug.ini:/usr/local/etc/php/conf.d/xdebug.ini
-    networks:
-      - app-tier
-
-networks:
-  app-tier:
-    driver: bridge
+      - ./docker/php/conf.d:/usr/local/etc/php/conf.d
+#      - ./docker/php-fpm/pool.d/www.conf:/usr/local/etc/php-fpm.d/custom.conf
