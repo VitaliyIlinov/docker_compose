@@ -20,21 +20,28 @@ else
 	@echo "without foo"
 endif
 
-.PHONY: code-sniff
-code-sniff:
-	@echo "Checking the standard code..."
-	@docker-compose exec -T php ./app/vendor/bin/phpcs -v --standard=PSR2 app
+.PHONY: composer-install
+composer-install:
+	@echo "composer install..."
+	@docker-compose exec $(uid) composer install
 
 .PHONY: logs
 logs:
 	@docker-compose logs -f
 
+.PHONY: config
+config:
+	@docker-compose config
+
+
 .PHONY: build
-build: SOME_TEST:=test
+build: uid:=1000
+build: user:=iliya
 build:
-	@echo "build..."
+	@echo "build... or you can docker-compose build"
 	 docker build \
-  	--build-arg SOME_TEST=$(SOME_TEST) \
+  	--build-arg uid=$(uid) \
+  	--build-arg user=$(user) \
  	--force-rm  \
  	--no-cache \
  	-t $(IMAGE_NAME) .

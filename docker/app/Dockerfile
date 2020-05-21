@@ -2,9 +2,8 @@
 FROM php:7.2-fpm
 MAINTAINER vitaliy ilinov <ilinov123@gmail.com>
 
-#See makefile
-ARG SOME_TEST=7.2
-ENV SOME_TEST=${SOME_TEST}
+ARG user
+ARG uid
 
 # Install and enable xDebug
 RUN pecl install xdebug \
@@ -23,13 +22,14 @@ RUN apt-get update && apt-get install -y \
 # Install composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-# Add user
-RUN groupadd -g 1000 www \
-&& useradd -u 1000 -ms /bin/bash -g www www
-
-# Change current user to www
-USER www
 COPY /docker/after-build.sh /docker/after-build.sh
 RUN bash /docker/after-build.sh
 
+# Create system user
+RUN useradd -G www-data,root -u $uid -d /home/$user $user
+RUN mkdir -p /home/$user/.composer && \
+    chown -R $user:$user /home/$user
+
+# Change current user
+USER $user
 CMD ["php-fpm"]
