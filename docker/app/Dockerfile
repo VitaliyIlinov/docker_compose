@@ -33,6 +33,3 @@ COPY ./ /docker
 
 #additional
 RUN bash /docker/after-build.sh
-
-# A docker container will run as long as the CMD from your Dockerfile takes
-CMD /docker/entrypoint.sh
