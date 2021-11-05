@@ -1,27 +1,24 @@
 version: '3'
 #https://www.digitalocean.com/community/tutorials/how-to-containerize-a-laravel-application-for-development-with-docker-compose-on-ubuntu-18-04-ru
 services:
-  #MySQL Service https://hub.docker.com/_/mysql
-  db:
-    image: mysql:8.0.12
-    #command: mysqld --default-authentication-plugin=mysql_native_password
-    container_name: db
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
-    ports:
-      - "${DB_PORT}:3306"
+  #PHP Service
+  app:
+    image: app
+    container_name: app
+    working_dir: /var/www
+    # current user uid && gid
+    user: ${USER_ID}:${GROUP_ID}
     volumes:
-      - ${DB_DATA_PATH}:/var/lib/mysql
-      - ./docker/mysql/conf.d:/etc/mysql/conf.d
-      - ./docker/mysql/init:/docker-entrypoint-initdb.d
-
-  adminer:
-    image: adminer
-    container_name: adminer
-    restart: always
-    ports:
-      - 8080:8080
+      - ./:/var/www
+      - ./storage/logs/php:/var/log/php
+      - ./docker/configs/php/conf.d:/usr/local/etc/php/conf.d
+  #      - ./docker/php-fpm/pool.d/www.conf:/usr/local/etc/php-fpm.d/custom.conf
+    links:
+      - db
+    env_file:
+      - docker-compose.env
+    networks:
+      - app-network
 
   #Nginx Service https://hub.docker.com/_/nginx
   nginx:
@@ -31,22 +28,40 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ${APP_PATH_DIR}:${APP_PATH_CONTAINER}
-      - ${FOLDER_LOG_PATH}/nginx/:/var/log/nginx
-      - ./docker/nginx/conf.d/:/etc/nginx/conf.d/
+      - ./:/var/www
+      - ./storage/logs/nginx:/var/log/nginx
+      - ./docker/configs/nginx/conf.d/:/etc/nginx/conf.d/
+    links:
+      - study
+    networks:
+      - app-network
 
-  #PHP Service
-  app:
-    image: app
-    container_name: app
-    working_dir: ${APP_PATH_CONTAINER}
+    #MySQL Service https://hub.docker.com/_/mysql
+  db:
+    image: mysql:8.0.12
+    #command: mysqld --default-authentication-plugin=mysql_native_password
+    container_name: db
+    environment:
+      #from .env load configs
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_DATABASE}
+    ports:
+      - "3306:3306"
     volumes:
-      - ${APP_PATH_DIR}:${APP_PATH_CONTAINER}
-      - ${FOLDER_LOG_PATH}/app/:/var/log/php
-      - ./docker/php/conf.d:/usr/local/etc/php/conf.d
-#      - ./docker/php-fpm/pool.d/www.conf:/usr/local/etc/php-fpm.d/custom.conf
+      - ./storage/mysql:/var/lib/mysql
+      - ./storage/logs/mysql:/var/log/mysql
+      - ./docker/configs/mysql/conf.d:/etc/mysql/conf.d
 
-#todo
-# does not work(docker bug)
-#   env_file:
-#   - ./docker/app/.env
+  adminer:
+    image: adminer
+    container_name: adminer
+    restart: always
+    ports:
+      - "8080:8080"
+    networks:
+      - app-network
+
+#Docker Networks
+networks:
+  app-network:
+    driver: bridge
