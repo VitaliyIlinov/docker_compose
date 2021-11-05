@@ -1,60 +1,69 @@
-include .env
-IMAGE_NAME = app
-BUILD_ID ?= $(shell /bin/date "+%Y%m%d-%H%M%S")
-ARGS = $(filter-out $@,$(MAKECMDGOALS))
+#  Makefile for Docker Nginx PHP Composer MySQL
 
-E ?= ternarniy operator
+include .env
+
+CURRENT_UID=$(shell id -u):$(shell id -g)
+ARGS = $(filter-out $@,$(MAKECMDGOALS))
+MYSQL_DUMP=dumps/dump.sql
+
+.SILENT: ;               # no need for @
+.EXPORT_ALL_VARIABLES: ; # send all vars to shell
 
 default: help
 
-test: foo:=7.2
-test: foo1:=nginx
-test:$(foo) $(foo1)
-	#echo $(E)
-	#echo $(ARGS)
-	#echo $(foo)
-	#echo $(foo1)
-ifneq ($(foo),)
-	@echo "with foo"
-else
-	@echo "without foo"
+check:
+ifeq ($(APP_NAME),)
+	$(error Missed APP_NAME argument.)
 endif
 
-build: uid:=$(shell id -u)
-build:
+build : check
 	@echo "build..."
-	 docker build \
-  	--build-arg uid=$(uid) \
- 	--force-rm  \
- 	--no-cache \
- 	-t $(IMAGE_NAME) ./docker/app/
+	 docker-compose build --force-rm
+
+code-sniff:
+	echo "Checking the standard code..."
+	docker-compose exec -T app ./vendor/bin/phpcs ./
 
 up:
 	docker-compose up -d
 
 down:
-	docker-compose down
+	@docker-compose down
 
-bash: up
-	docker-compose exec $(IMAGE_NAME) bash
+dependency:
+	@docker-compose exec -T app composer install
+
+bash:
+	@docker-compose exec app bash
 
 logs:
-	@docker-compose logs ${ARGS}
+	@docker-compose logs $(ARGS)
 
 config:
 	@docker-compose config
 
-del:
-	@docker container rm $(shell docker ps -aq) -f
+clean:
+	@rm -R ./storage/logs/*
 
-clear_logs:
-	sudo rm -R $(FOLDER_LOG_PATH)/*
-	sudo rm -R $(DB_DATA_PATH)/*
+mysql-dump:
+	@docker exec db mysqldump --extended-insert=FALSE -u"$(DB_USERNAME)" -p"$(DB_PASSWORD)" $(DB_DATABASE) > "$(MYSQL_DUMP)"
+
+mysql-restore:
+	@docker exec -i db mysql -u"$(DB_USERNAME)" -p"$(DB_PASSWORD)" $(DB_DATABASE) < $(MYSQL_DUMP)
 
 help:
-	@echo 'Targets:'
+	@echo ""
+	@echo "usage: make COMMAND"
+	@echo ""
+	@echo "Commands:"
 	@echo ' - build         Build docker images'
 	@echo ' - up            Create and start containers'
-	@echo ' - up-d          Create and start containers in the background'
+	@echo ' - bash          Enter in container'
+	@echo ' - logs [NAME]   Show container logs'
+	@echo ' - clean         Clean App logs'
+	@echo ' - mysql-dump    Create backup of all databases'
+	@echo ' - mysql-restore Restore backup of all databases'
+	@echo ' - up            Create and start containers in the background'
 	@echo ' - down          Stop and remove containers, networks, images, and volumes'
+	@echo ' - dependency    Bash to container & Install composer and npm'
 	@echo ' - help          Show this help and exit'
