@@ -22,15 +22,16 @@ build : check
 
 code-sniff:
 	echo "Checking the standard code..."
-	docker-compose exec -T app ./vendor/bin/phpcs ./
+	docker-compose exec -T app ./vendor/bin/phpcs ./${ARGS}
 
 up:
+	#make change-owner
 	docker-compose up -d
 
 down:
 	@docker-compose down
 
-dependency:
+composer:
 	@docker-compose exec -T app composer install
 
 bash:
@@ -42,7 +43,10 @@ logs:
 config:
 	@docker-compose config
 
-clean:
+change-owner:
+	@sudo chown -R $(USER):$(USER) storage/logs/
+
+clean: #chmod -R 777 storage/
 	@rm -R ./storage/logs/*
 
 mysql-dump:
@@ -65,5 +69,5 @@ help:
 	@echo ' - mysql-restore Restore backup of all databases'
 	@echo ' - up            Create and start containers in the background'
 	@echo ' - down          Stop and remove containers, networks, images, and volumes'
-	@echo ' - dependency    Bash to container & Install composer and npm'
+	@echo ' - composer      Bash to container & Install composer and npm'
 	@echo ' - help          Show this help and exit'

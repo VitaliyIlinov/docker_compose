@@ -2,8 +2,7 @@
 FROM php:7.4-fpm
 MAINTAINER vitaliy ilinov <ilinov123@gmail.com>
 
-ARG user
-ARG uid
+WORKDIR /var/www
 
 # Install and enable additional extensions
 COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/bin/

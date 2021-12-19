@@ -80,7 +80,7 @@ When developing, you can use [Makefile](https://en.wikipedia.org/wiki/Make_(soft
 | mysql-dump    | Create database backup                       |
 | mysql-restore | Restore database backup                      |
 | bash          | Enter to main container                      |
-| dependency    | Bash to container & Install composer and npm |
+| composer      | Bash to container & Install composer         |
 
 ### Examples
 
