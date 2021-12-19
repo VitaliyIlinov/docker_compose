@@ -2,17 +2,13 @@
 FROM php:7.4-fpm
 MAINTAINER vitaliy ilinov <ilinov123@gmail.com>
 
-# console command: id -u
-# 1000 - is USER;
-# && creating file in MOUNT volume will be from current user
-ARG GROUP_ID
-ARG USER_ID
+ARG user
+ARG uid
 
 # Install and enable additional extensions
-
 COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/bin/
 
-# Install extensions by docker-php-ext-install.
+## Install extensions by docker-php-ext-install.
 RUN install-php-extensions pdo_mysql \
     gd \
     imagick \
@@ -29,14 +25,11 @@ RUN apt-get update && apt-get install -y \
     autoconf \
     make \
     wget \
-    npm \
+#    npm \
     curl
 
 ## Install composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
-
-# Create user
-RUN useradd -m ${USER_ID} --uid=${GROUP_ID}
 
 COPY ./ /docker
 

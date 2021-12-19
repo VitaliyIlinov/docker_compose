@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<!-- https://github.com/squizlabs/PHP_CodeSniffer/wiki/Advanced-Usage#using-a-default-configuration-file -->
+<ruleset name="custom">
+    <description>Coding standard based on PSR2 with some additions.</description>
+
+    <exclude-pattern>*/Tests/*\.(inc|css|js)$</exclude-pattern>
+    <exclude-pattern>docker/*</exclude-pattern>
+    <exclude-pattern>vendor/*</exclude-pattern>
+    <exclude-pattern>storage/*</exclude-pattern>
+
+    <arg name="basepath" value="."/>
+    <arg name="colors"/>
+    <arg name="parallel" value="75"/>
+    <arg value="np"/>
+
+    <rule ref="PSR2"/>
+
+</ruleset>
