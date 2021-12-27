@@ -37,7 +37,8 @@ RUN apt-get update && apt-get install -y \
 COPY ./ /docker
 RUN mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"
 
-RUN usermod -u ${UID} www-data && groupmod -g ${GID} www-data
+#Create user
+RUN groupadd --gid $GID $UID && useradd --uid $UID --gid $GID -m $UID
 
 #additional
 RUN bash /docker/after-build.sh
