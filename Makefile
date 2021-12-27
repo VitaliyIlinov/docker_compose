@@ -25,7 +25,6 @@ code-sniff:
 	docker-compose exec -T app ./vendor/bin/phpcs ./${ARGS}
 
 up:
-	#make change-owner
 	docker-compose up -d
 
 down:
@@ -42,9 +41,6 @@ logs:
 
 config:
 	@docker-compose config
-
-change-owner:
-	@sudo chown -R $(USER):$(USER) storage/logs/
 
 clean: #chmod -R 777 storage/
 	@rm -R ./storage/logs/*

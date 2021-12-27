@@ -82,20 +82,6 @@ When developing, you can use [Makefile](https://en.wikipedia.org/wiki/Make_(soft
 | bash          | Enter to main container                      |
 | composer      | Bash to container & Install composer         |
 
-### Examples
-
-Start the application :
-
-```sh
-make up
-```
-
-Show help :
-
-```sh
-make help
-```
-
 ## Run the application
 
 1. Copying the **env** configuration file :
@@ -110,10 +96,20 @@ make help
     make build
     ```
 
-3. Start the application :
+3. Create folder logs with permissions :
+
+    ```sh
+    mkdir -p storage && chmod -R 777 storage
+    ```
+
+4. Start the application :
 
     ```sh
     make up
+    ```
+
+   ```sh
+    make composer
     ```
 
    **Please wait this might take a several minutes...**
@@ -122,7 +118,7 @@ make help
     make logs -f # Follow log output
     ```
 
-4. Open your favorite browser :
+5. Open your favorite browser :
 
     * [http://localhost:81](http://localhost:81/)
     * [http://localhost:8080](http://localhost:8080/) Adminer (username: root, password: see in **.env**)
@@ -131,4 +127,10 @@ make help
 
     ```sh
     make down
+    ```
+
+5. Clear logs
+
+    ```sh
+    make clean
     ```
