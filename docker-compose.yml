@@ -6,11 +6,14 @@ services:
     build:
       context: ./docker
       dockerfile: Dockerfile
+      args:
+        UID: '${CURRENT_UID}'
+        GID: '${CURRENT_GID}'
     image: '${APP_NAME}'
     restart: unless-stopped
     container_name: app
     # current user id and group id
-    user: '${CURRENT_UID}'
+    user: '${CURRENT_UID}:${CURRENT_GID}'
     volumes:
       - './:/var/www'
       - './storage/logs/php:/var/log/php'

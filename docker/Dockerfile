@@ -2,6 +2,9 @@
 FROM php:7.4-fpm
 MAINTAINER vitaliy ilinov <ilinov123@gmail.com>
 
+ARG UID
+ARG GID
+
 WORKDIR /var/www
 
 # Install and enable additional extensions
@@ -26,12 +29,15 @@ RUN apt-get update && apt-get install -y \
     autoconf \
     make \
     wget \
+    git \
     npm \
     curl
 
 
 COPY ./ /docker
 RUN mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"
+
+RUN usermod -u {UID} www-data && groupmod -g {GID} www-data
 
 #additional
 RUN bash /docker/after-build.sh

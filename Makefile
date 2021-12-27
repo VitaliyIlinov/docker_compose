@@ -2,7 +2,9 @@
 
 include .env
 
-CURRENT_UID=$(shell id -u):$(shell id -g)
+CURRENT_UID=$(shell id -u)
+CURRENT_GID=$(shell id -g)
+
 ARGS = $(filter-out $@,$(MAKECMDGOALS))
 MYSQL_DUMP=dumps/dump.sql
 
