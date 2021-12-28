@@ -26,6 +26,10 @@ code-sniff:
 	echo "Checking the standard code..."
 	docker-compose exec -T app ./vendor/bin/phpcs ./${ARGS}
 
+lint:
+	echo "Checking the standard code..."
+	find . -name '*.php' -exec php -l {} \; | grep "error:"
+
 up:
 	docker-compose up -d
 
