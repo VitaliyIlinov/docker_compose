@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
 
-apt autoremove -y 2&>1 >/dev/null
-apt clean -y 2&>1 >/dev/null
-apt autoclean -y 2&>1 >/dev/null
+# Exit the script if any statement returns a non-true return value
+set -e
 
-# Clear cache
+apt autoremove -y 2&>1 >/dev/null || true
+apt clean -y 2&>1 >/dev/null || true
+apt autoclean -y 2&>1 >/dev/null || true
+
 rm -rf \
   /var/lib/apt/lists/* \
   /tmp/*

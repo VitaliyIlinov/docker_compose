@@ -2,7 +2,9 @@
 
 include .env
 
-CURRENT_UID=$(shell id -u):$(shell id -g)
+CURRENT_UID=$(shell id -u)
+CURRENT_GID=$(shell id -g)
+
 ARGS = $(filter-out $@,$(MAKECMDGOALS))
 MYSQL_DUMP=dumps/dump.sql
 
@@ -22,10 +24,10 @@ build : check
 
 code-sniff:
 	echo "Checking the standard code..."
+	echo "vendor/bin/phpcs $(git diff --name-status [CURRENT_BRANCH] | grep '\.php$' | grep -v "^[RD]" | awk '{ print $2 }')"
 	docker-compose exec -T app ./vendor/bin/phpcs ./${ARGS}
 
 up:
-	#make change-owner
 	docker-compose up -d
 
 down:
@@ -43,11 +45,8 @@ logs:
 config:
 	@docker-compose config
 
-change-owner:
-	@sudo chown -R $(USER):$(USER) storage/logs/
-
 clean: #chmod -R 777 storage/
-	@rm -R ./storage/logs/*
+	@find storage -name "*.log" -delete
 
 mysql-dump:
 	@docker exec db mysqldump --extended-insert=FALSE -u"$(DB_USERNAME)" -p"$(DB_PASSWORD)" $(DB_DATABASE) > "$(MYSQL_DUMP)"

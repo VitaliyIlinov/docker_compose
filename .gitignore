@@ -1,4 +1,2 @@
 .env
-/storage/logs
-/storage/mysql
 vendor/
