@@ -27,6 +27,10 @@ code-sniff:
 	echo "vendor/bin/phpcs $(git diff --name-status [CURRENT_BRANCH] | grep '\.php$' | grep -v "^[RD]" | awk '{ print $2 }')"
 	docker-compose exec -T app ./vendor/bin/phpcs ./${ARGS}
 
+lint:
+	echo "Checking the standard code..."
+	find . -name '*.php' -exec php -l {} \; | grep "error:"
+
 up:
 	docker-compose up -d
 
