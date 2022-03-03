@@ -1,4 +1,12 @@
-#  Makefile for Docker Nginx PHP Composer MySQL
+# HELP
+# This will output the help for each task
+# thanks to https://marmelab.com/blog/2016/02/29/auto-documented-makefile.html
+.PHONY: help
+
+help: ## This help.
+	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
+
+.DEFAULT_GOAL := help
 
 include .env
 
@@ -11,66 +19,46 @@ MYSQL_DUMP=dumps/dump.sql
 .SILENT: ;               # no need for @
 .EXPORT_ALL_VARIABLES: ; # send all vars to shell
 
-default: help
 
 check:
 ifeq ($(APP_NAME),)
 	$(error Missed APP_NAME argument.)
 endif
 
-build : check
-	@echo "build..."
-	 docker-compose build --force-rm
+build : check ## Build docker images
+	echo "build..."
+	docker-compose build --force-rm
 
-code-sniff:
-	echo "Checking the standard code..."
+code-sniff: ## Checking the standard code
 	echo "vendor/bin/phpcs $(git diff --name-status [CURRENT_BRANCH] | grep '\.php$' | grep -v "^[RD]" | awk '{ print $2 }')"
 	docker-compose exec -T app ./vendor/bin/phpcs ./${ARGS}
 
-lint:
-	echo "Checking the standard code..."
+lint: ## Checking the standard code
 	find . -name '*.php' -exec php -l {} \; | grep "error:"
 
-up:
+up: ## Create and start containers in the background
 	docker-compose up -d
 
-down:
-	@docker-compose down
+down: ## Remove docker containers
+	docker-compose down
 
-composer:
-	@docker-compose exec -T app composer install
+composer-install: up ## Install php dependencies
+	docker-compose exec -T app composer install
 
-bash:
-	@docker-compose exec app bash
+bash: ## Enter in container
+	docker-compose exec app bash
 
-logs:
-	@docker-compose logs $(ARGS)
+logs: ## Show container logs
+	docker-compose logs $(ARGS)
 
-config:
-	@docker-compose config
+config: ## Show docker config
+	docker-compose config
 
-clean: #chmod -R 777 storage/
-	@find storage -name "*.log" -delete
+clean: ## Clean App logs chmod -R 777 storage/
+	find storage -name "*.log" -delete
 
-mysql-dump:
-	@docker exec db mysqldump --extended-insert=FALSE -u"$(DB_USERNAME)" -p"$(DB_PASSWORD)" $(DB_DATABASE) > "$(MYSQL_DUMP)"
+mysql-dump: ## Create backup of all databases
+	docker exec db mysqldump --extended-insert=FALSE -u"$(DB_USERNAME)" -p"$(DB_PASSWORD)" $(DB_DATABASE) > "$(MYSQL_DUMP)"
 
-mysql-restore:
-	@docker exec -i db mysql -u"$(DB_USERNAME)" -p"$(DB_PASSWORD)" $(DB_DATABASE) < $(MYSQL_DUMP)
-
-help:
-	@echo ""
-	@echo "usage: make COMMAND"
-	@echo ""
-	@echo "Commands:"
-	@echo ' - build         Build docker images'
-	@echo ' - up            Create and start containers'
-	@echo ' - bash          Enter in container'
-	@echo ' - logs [NAME]   Show container logs'
-	@echo ' - clean         Clean App logs'
-	@echo ' - mysql-dump    Create backup of all databases'
-	@echo ' - mysql-restore Restore backup of all databases'
-	@echo ' - up            Create and start containers in the background'
-	@echo ' - down          Stop and remove containers, networks, images, and volumes'
-	@echo ' - composer      Bash to container & Install composer and npm'
-	@echo ' - help          Show this help and exit'
+mysql-restore: ## Restore backup of all databases
+	docker exec -i db mysql -u"$(DB_USERNAME)" -p"$(DB_PASSWORD)" $(DB_DATABASE) < $(MYSQL_DUMP)
