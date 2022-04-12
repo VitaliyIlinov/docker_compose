@@ -1,5 +1,5 @@
 #https://hub.docker.com/_/php
-FROM php:7.4-fpm
+FROM php:8.0-fpm
 
 MAINTAINER vitaliy ilinov <ilinov123@gmail.com>
 
