@@ -1,4 +1,5 @@
-version: '3'
+version: '3.7'
+
 #https://www.digitalocean.com/community/tutorials/how-to-containerize-a-laravel-application-for-development-with-docker-compose-on-ubuntu-18-04-ru
 services:
   #PHP Service
@@ -17,8 +18,8 @@ services:
     volumes:
       - './:/var/www/html'
       - './storage/logs/php:/var/log/php'
-      - './docker/configs/php/conf.d:/usr/local/etc/php/conf.d'
-    #      - ./docker/php-fpm/pool.d/www.conf:/usr/local/etc/php-fpm.d/custom.conf
+      - './docker/configs/php/conf.d/local.ini:/usr/local/etc/php/conf.d/local.ini'
+ #      - ./docker/php-fpm/pool.d/www.conf:/usr/local/etc/php-fpm.d/www.conf
     env_file:
       - docker-compose.env
     networks:
