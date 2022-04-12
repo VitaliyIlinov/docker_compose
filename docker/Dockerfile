@@ -30,6 +30,7 @@ RUN install-php-extensions @composer \
     imagick \
     zip \
     opcache \
+    exif \
     memcached \
     xdebug \
     pdo_mysql \
