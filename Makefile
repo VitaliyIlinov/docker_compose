@@ -19,14 +19,9 @@ MYSQL_DUMP=dumps/dump.sql
 .SILENT: ;               # no need for @
 .EXPORT_ALL_VARIABLES: ; # send all vars to shell
 
+default: help
 
-check:
-ifeq ($(APP_NAME),)
-	$(error Missed APP_NAME argument.)
-endif
-
-build : check ## Build docker images
-	echo "build..."
+build : ## Build docker images
 	docker-compose build --force-rm
 
 code-sniff: ## Checking the standard code
